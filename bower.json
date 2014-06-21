@@ -1,0 +1,21 @@
+{
+    "name": "jqKladr",
+    "version": "0.0.0",
+    "description": "Плагин для автодополнения полей адреса при вводе.",
+    "authors": [
+        "Александр Суслов <suslov@me.com>",
+        "Iliya Garakh <garakh@primepix.ru>"
+    ],
+    "keywords": [
+        "kladr",
+        "jquery"
+    ],
+    "license": "MIT",
+    "ignore": [
+        "**/.*",
+        "node_modules",
+        "bower_components",
+        "test",
+        "tests"
+    ]
+}
