@@ -10,6 +10,9 @@ class Plugin
     if @$el
       console.log 'create input'
       @input =  new Input @
+
+    #display
+    @display = new Display @
       # @el.html @input.render().$el
   ###
   #
@@ -22,8 +25,15 @@ class Plugin
   @param query[String] запрос
   ###
   query:(query)->
+    self = @
     @kladr.api query, (result)->
-      console.log result
+      self.open result
+
+  # открыть список
+  # @todo
+  open:(result)->
+    @display.collection = result
+    @display.render()
 
   # Закрыть список
   # @todo
@@ -38,6 +48,7 @@ $ ->
 $ ->
   # Подключение автодополнения улиц
   $('[name="mskstreet"]').jqKladr
+    prefix:'jqKladr'
     token: '51dfe5d42fb2b43e3300006e'
     key: '86a2c2a06f1b2451a87d05512cc2c3edfdf41969'
     # type: $.kladr.type.street

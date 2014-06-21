@@ -254,7 +254,54 @@
   })();
 
   Display = (function() {
-    function Display() {}
+    Display.prototype.template = function() {
+      return "<div id=\"" + this.P.opt.prefix + "_autocomplete\"><ul></ul></div>\n";
+    };
+
+    Display.prototype.row = function(item) {
+      return "<li><a data-val=\"" + item.name + "\"> " + item.name + " </a></li>";
+    };
+
+    Display.prototype.style = function() {
+      return "<style>\n#" + this.P.opt.prefix + "_autocomplete ul{\n    position: absolute;\n    display: block;\n    margin: 0;\n    padding: 0;\n    border: 1px solid rgb(138, 138, 138);\n    border-radius: 3px;\n    background-color: white;\n    z-index: 9999;\n}\n\n#" + this.P.opt.prefix + "_autocomplete li{\n    display: list-item;\n    list-style-type: none;\n    margin: 0;\n    padding: 3px 5px;\n    overflow: hidden;\n    border: 1px solid white;\n    border-bottom: 1px solid rgb(189, 189, 189);\n}\n\n#" + this.P.opt.prefix + "_autocomplete li.active{\n    background-color: rgb(224, 224, 224);\n    border-radius: 3px;\n    border: 1px solid rgb(151, 151, 151);\n}\n\n#" + this.P.opt.prefix + "_autocomplete a{\n    display: block;\n    cursor: default;\n    width: 10000px;\n}\n\n#" + this.P.opt.prefix + "_autocomplete .spinner{\n    position: absolute;\n    display: block;\n    margin: 0;\n    padding: 0;\n    width: 20px;\n    height: 20px;\n    background-color: transparent;\n    background-image: url(\"images/spinner.png\");\n    background-position: center center;\n    background-repeat: no-repeat;\n    z-index: 9999;\n}\n</style>";
+    };
+
+    function Display(P) {
+      this.P = P;
+      $('body').append(this.template());
+      $('head').append(this.style());
+      this.$el = $("#" + this.P.opt.prefix + "_autocomplete");
+      this.$list = $("#" + this.P.opt.prefix + "_autocomplete ul");
+      this.position();
+    }
+
+    Display.prototype.position = function() {
+      var differ, input, inputHeight, inputOffset, inputWidth;
+      input = this.P.input.$el;
+      inputOffset = input.offset();
+      inputWidth = input.outerWidth();
+      inputHeight = input.outerHeight();
+      this.$list.css({
+        top: inputOffset.top + inputHeight + "px",
+        left: inputOffset.left
+      });
+      differ = this.$list.outerWidth() - this.$list.width();
+      return this.$list.width(inputWidth - differ);
+    };
+
+    Display.prototype.render = function() {
+      var model, self, _i, _len, _ref;
+      self = this;
+      this.$list.empty();
+      _ref = this.collection;
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        model = _ref[_i];
+        self.$list.append(this.row(model));
+      }
+      return this.events();
+    };
+
+    Display.prototype.events = function() {};
 
     return Display;
 
@@ -271,6 +318,7 @@
         console.log('create input');
         this.input = new Input(this);
       }
+      this.display = new Display(this);
     }
 
 
@@ -285,9 +333,16 @@
      */
 
     Plugin.prototype.query = function(query) {
+      var self;
+      self = this;
       return this.kladr.api(query, function(result) {
-        return console.log(result);
+        return self.open(result);
       });
+    };
+
+    Plugin.prototype.open = function(result) {
+      this.display.collection = result;
+      return this.display.render();
     };
 
     Plugin.prototype.close = function() {};
@@ -304,6 +359,7 @@
 
   $(function() {
     return $('[name="mskstreet"]').jqKladr({
+      prefix: 'jqKladr',
       token: '51dfe5d42fb2b43e3300006e',
       key: '86a2c2a06f1b2451a87d05512cc2c3edfdf41969',
       type: 'street',
