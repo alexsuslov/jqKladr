@@ -44,76 +44,6 @@ class Kladr
       else
         callback and callback(false)
 
-class Option
-  token: null
-  key: null
-  type: null
-  parentType: null
-  parentId: null
-  limit: 10
-  withParents: false
-  verify: false
-  showSpinner: true
-  arrowSelect: true
-  current: null
-  open: null
-  close: null
-  send: null
-  received: null
-  select: null
-  check: null
-
-  ###
-  Получения списка объектов отображаемых при автодополнении.
-  По-умолчанию запрашивает данные у сервиса [kladr-api.ru] [1].
-  Может быть переопределена для получения объектов из другого источника.
-  @param query[]
-  @param calback[function]
-  ###
-  source: (query, callback) ->
-    params =
-      token: options.token
-      key: options.token
-      type: options.type
-      name: query
-      parentType: options.parentType
-      parentId: options.parentId
-      withParents: options.withParents
-      limit: options.limit
-    # @todo поменять прямой вызов api $.kladr.api
-    $.kladr.api params, callback if callback
-    @
-
-
-  ###
-  Форматирования значений в списке.
-  @param obj[Object] – объект КЛАДР,
-  @param query[String]– текущее значение поля ввода.
-  ###
-  labelFormat: (obj, query) ->
-    label = ""
-    name = obj.name.toLowerCase()
-    query = query.toLowerCase()
-    start = name.indexOf(query)
-    start = (if start > 0 then start else 0)
-    label += obj.typeShort + ". "  if obj.typeShort
-    if query.length < obj.name.length
-      label += obj.name.substr(0, start)
-      label += "<strong>" + obj.name.substr(start, query.length) + "</strong>"
-      label += obj.name.substr(start + query.length, obj.name.length - query.length - start)
-    else
-      label += "<strong>" + obj.name + "</strong>"
-    label
-
-
-  ###
-  Форматирования подставляемых в поле ввода значений.
-  @param obj[Object] – объект КЛАДР,
-  @param query[String]– текущее значение поля ввода.
-  ###
-  valueFormat: (obj, query) ->
-    obj.name
-
 # Ввод запроса
 class Input
   ###
@@ -126,7 +56,11 @@ class Input
     @opt = @P.opt if @P?.opt
     @kladr = @P.kladr
     @events()
-
+  val:(value)->
+    if typeof(value) is 'undefined'
+      return @$el.val()
+    else
+      @$el.val value
   # События ввода
   events:->
     self = @
@@ -144,6 +78,10 @@ class Input
         return
       # spinnerShow
       self.P.query query
+
+
+    @$el.on 'keydown', (e)->
+      self.P.display.keyselect e
 
 
   # проверка
@@ -203,6 +141,12 @@ class Input
 
 
 class Display
+  keys:
+    up: 38
+    down: 40
+    esc: 27
+    enter: 13
+
   # объект
   template:->
     """
@@ -211,7 +155,13 @@ class Display
     """
   # строка
   row:(item)->
-    "<li><a data-val=\"#{item.name}\"> #{item.name} </a></li>"
+    name = item.name
+    if @highlight
+      name = name.replace new RegExp( '(' + @highlight + ')', 'gi') , (highlight)->
+        "<strong>#{highlight}</strong>"
+    "<li data-val=\"#{item.name}\" > #{name} </li>"
+
+  # стили
   style:->
     """
 <style>
@@ -266,9 +216,11 @@ class Display
 
   # конструктор
   constructor:(@P)->
+    @opt = @P.opt if @P.opt
     $('body').append @template()
     $('head').append @style()
     @$el = $("##{@P.opt.prefix}_autocomplete")
+    @$el.hide()
     @$list = $("##{@P.opt.prefix}_autocomplete ul")
     @position()
 
@@ -289,6 +241,7 @@ class Display
     # spinner.css
     #   top: inputOffset.top + (inputHeight - spinnerHeight) / 2 - 1
     #   left: inputOffset.left + inputWidth - spinnerWidth - 2
+
   # собрать список
   render:->
     self = @
@@ -296,10 +249,47 @@ class Display
     for model in @collection
       self.$list.append @row model
     @events()
+    @$el.show()
+
+  activate:(active)->
+    active.addClass "active"
+
+  # Обработка up/down enter/ esc
+  keyselect:(e)->
+    active = @$list.find("li.active")
+
+    switch e.which
+      when @keys.up
+        if active.length
+          active.removeClass "active"
+          @activate active.prev()
+        else
+          @activate @$list.find("li").last()
+      when @keys.down
+        if active.length
+          active.removeClass "active"
+          @activate active.next()
+        else
+          @activate @$list.find("li").first()
+      when @keys.esc
+        active.removeClass "active"
+        @close()
+      when @keys.enter
+        # вставляю выбранное значение в input
+        unless @opt.arrowSelect
+          @P.input.val $(active).data('val')
+        active.removeClass "active"
+        @close()
+
+  # закрыть список
+  close:->
+    @$el.hide()
 
   # события
   events:->
     # @$list
+
+
 
 # jQuery plugin
 class Plugin
@@ -329,6 +319,8 @@ class Plugin
   ###
   query:(query)->
     self = @
+    # для работы выделения набранного текста
+    @display.highlight = query
     @kladr.api query, (result)->
       self.open result
 

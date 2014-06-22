@@ -1,4 +1,10 @@
 class Display
+  keys:
+    up: 38
+    down: 40
+    esc: 27
+    enter: 13
+
   # объект
   template:->
     """
@@ -7,7 +13,13 @@ class Display
     """
   # строка
   row:(item)->
-    "<li><a data-val=\"#{item.name}\"> #{item.name} </a></li>"
+    name = item.name
+    if @highlight
+      name = name.replace new RegExp( '(' + @highlight + ')', 'gi') , (highlight)->
+        "<strong>#{highlight}</strong>"
+    "<li data-val=\"#{item.name}\" > #{name} </li>"
+
+  # стили
   style:->
     """
 <style>
@@ -62,9 +74,11 @@ class Display
 
   # конструктор
   constructor:(@P)->
+    @opt = @P.opt if @P.opt
     $('body').append @template()
     $('head').append @style()
     @$el = $("##{@P.opt.prefix}_autocomplete")
+    @$el.hide()
     @$list = $("##{@P.opt.prefix}_autocomplete ul")
     @position()
 
@@ -85,6 +99,7 @@ class Display
     # spinner.css
     #   top: inputOffset.top + (inputHeight - spinnerHeight) / 2 - 1
     #   left: inputOffset.left + inputWidth - spinnerWidth - 2
+
   # собрать список
   render:->
     self = @
@@ -92,7 +107,44 @@ class Display
     for model in @collection
       self.$list.append @row model
     @events()
+    @$el.show()
+
+  activate:(active)->
+    active.addClass "active"
+
+  # Обработка up/down enter/ esc
+  keyselect:(e)->
+    active = @$list.find("li.active")
+
+    switch e.which
+      when @keys.up
+        if active.length
+          active.removeClass "active"
+          @activate active.prev()
+        else
+          @activate @$list.find("li").last()
+      when @keys.down
+        if active.length
+          active.removeClass "active"
+          @activate active.next()
+        else
+          @activate @$list.find("li").first()
+      when @keys.esc
+        active.removeClass "active"
+        @close()
+      when @keys.enter
+        # вставляю выбранное значение в input
+        unless @opt.arrowSelect
+          @P.input.val $(active).data('val')
+        active.removeClass "active"
+        @close()
+
+  # закрыть список
+  close:->
+    @$el.hide()
 
   # события
   events:->
     # @$list
+
+

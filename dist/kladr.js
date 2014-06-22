@@ -1,5 +1,5 @@
 (function() {
-  var Display, Input, Kladr, Option, Plugin;
+  var Display, Input, Kladr, Plugin;
 
   Kladr = (function() {
     function Kladr(P) {
@@ -73,112 +73,6 @@
 
   })();
 
-  Option = (function() {
-    function Option() {}
-
-    Option.prototype.token = null;
-
-    Option.prototype.key = null;
-
-    Option.prototype.type = null;
-
-    Option.prototype.parentType = null;
-
-    Option.prototype.parentId = null;
-
-    Option.prototype.limit = 10;
-
-    Option.prototype.withParents = false;
-
-    Option.prototype.verify = false;
-
-    Option.prototype.showSpinner = true;
-
-    Option.prototype.arrowSelect = true;
-
-    Option.prototype.current = null;
-
-    Option.prototype.open = null;
-
-    Option.prototype.close = null;
-
-    Option.prototype.send = null;
-
-    Option.prototype.received = null;
-
-    Option.prototype.select = null;
-
-    Option.prototype.check = null;
-
-
-    /*
-    Получения списка объектов отображаемых при автодополнении.
-    По-умолчанию запрашивает данные у сервиса [kladr-api.ru] [1].
-    Может быть переопределена для получения объектов из другого источника.
-    @param query[]
-    @param calback[function]
-     */
-
-    Option.prototype.source = function(query, callback) {
-      var params;
-      params = {
-        token: options.token,
-        key: options.token,
-        type: options.type,
-        name: query,
-        parentType: options.parentType,
-        parentId: options.parentId,
-        withParents: options.withParents,
-        limit: options.limit
-      };
-      if (callback) {
-        $.kladr.api(params, callback);
-      }
-      return this;
-    };
-
-
-    /*
-    Форматирования значений в списке.
-    @param obj[Object] – объект КЛАДР,
-    @param query[String]– текущее значение поля ввода.
-     */
-
-    Option.prototype.labelFormat = function(obj, query) {
-      var label, name, start;
-      label = "";
-      name = obj.name.toLowerCase();
-      query = query.toLowerCase();
-      start = name.indexOf(query);
-      start = (start > 0 ? start : 0);
-      if (obj.typeShort) {
-        label += obj.typeShort + ". ";
-      }
-      if (query.length < obj.name.length) {
-        label += obj.name.substr(0, start);
-        label += "<strong>" + obj.name.substr(start, query.length) + "</strong>";
-        label += obj.name.substr(start + query.length, obj.name.length - query.length - start);
-      } else {
-        label += "<strong>" + obj.name + "</strong>";
-      }
-      return label;
-    };
-
-
-    /*
-    Форматирования подставляемых в поле ввода значений.
-    @param obj[Object] – объект КЛАДР,
-    @param query[String]– текущее значение поля ввода.
-     */
-
-    Option.prototype.valueFormat = function(obj, query) {
-      return obj.name;
-    };
-
-    return Option;
-
-  })();
-
   Input = (function() {
 
     /*
@@ -199,10 +93,18 @@
       this.events();
     }
 
+    Input.prototype.val = function(value) {
+      if (typeof value === 'undefined') {
+        return this.$el.val();
+      } else {
+        return this.$el.val(value);
+      }
+    };
+
     Input.prototype.events = function() {
       var self;
       self = this;
-      return this.$el.on('keyup', function(e) {
+      this.$el.on('keyup', function(e) {
         var query, _ref;
         if ((8 < (_ref = event.which) && _ref < 46)) {
           return;
@@ -214,6 +116,9 @@
           return;
         }
         return self.P.query(query);
+      });
+      return this.$el.on('keydown', function(e) {
+        return self.P.display.keyselect(e);
       });
     };
 
@@ -254,12 +159,26 @@
   })();
 
   Display = (function() {
+    Display.prototype.keys = {
+      up: 38,
+      down: 40,
+      esc: 27,
+      enter: 13
+    };
+
     Display.prototype.template = function() {
       return "<div id=\"" + this.P.opt.prefix + "_autocomplete\"><ul></ul></div>\n";
     };
 
     Display.prototype.row = function(item) {
-      return "<li><a data-val=\"" + item.name + "\"> " + item.name + " </a></li>";
+      var name;
+      name = item.name;
+      if (this.highlight) {
+        name = name.replace(new RegExp('(' + this.highlight + ')', 'gi'), function(highlight) {
+          return "<strong>" + highlight + "</strong>";
+        });
+      }
+      return "<li data-val=\"" + item.name + "\" > " + name + " </li>";
     };
 
     Display.prototype.style = function() {
@@ -268,9 +187,13 @@
 
     function Display(P) {
       this.P = P;
+      if (this.P.opt) {
+        this.opt = this.P.opt;
+      }
       $('body').append(this.template());
       $('head').append(this.style());
       this.$el = $("#" + this.P.opt.prefix + "_autocomplete");
+      this.$el.hide();
       this.$list = $("#" + this.P.opt.prefix + "_autocomplete ul");
       this.position();
     }
@@ -298,7 +221,48 @@
         model = _ref[_i];
         self.$list.append(this.row(model));
       }
-      return this.events();
+      this.events();
+      return this.$el.show();
+    };
+
+    Display.prototype.activate = function(active) {
+      return active.addClass("active");
+    };
+
+    Display.prototype.keyselect = function(e) {
+      var active;
+      active = this.$list.find("li.active");
+      switch (e.which) {
+        case this.keys.up:
+          if (active.length) {
+            active.removeClass("active");
+            return this.activate(active.prev());
+          } else {
+            return this.activate(this.$list.find("li").last());
+          }
+          break;
+        case this.keys.down:
+          if (active.length) {
+            active.removeClass("active");
+            return this.activate(active.next());
+          } else {
+            return this.activate(this.$list.find("li").first());
+          }
+          break;
+        case this.keys.esc:
+          active.removeClass("active");
+          return this.close();
+        case this.keys.enter:
+          if (!this.opt.arrowSelect) {
+            this.P.input.val($(active).data('val'));
+          }
+          active.removeClass("active");
+          return this.close();
+      }
+    };
+
+    Display.prototype.close = function() {
+      return this.$el.hide();
     };
 
     Display.prototype.events = function() {};
@@ -335,6 +299,7 @@
     Plugin.prototype.query = function(query) {
       var self;
       self = this;
+      this.display.highlight = query;
       return this.kladr.api(query, function(result) {
         return self.open(result);
       });

@@ -26,6 +26,8 @@ class Plugin
   ###
   query:(query)->
     self = @
+    # для работы выделения набранного текста
+    @display.highlight = query
     @kladr.api query, (result)->
       self.open result
 

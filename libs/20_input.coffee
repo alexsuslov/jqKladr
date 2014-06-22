@@ -10,7 +10,11 @@ class Input
     @opt = @P.opt if @P?.opt
     @kladr = @P.kladr
     @events()
-
+  val:(value)->
+    if typeof(value) is 'undefined'
+      return @$el.val()
+    else
+      @$el.val value
   # События ввода
   events:->
     self = @
@@ -28,6 +32,10 @@ class Input
         return
       # spinnerShow
       self.P.query query
+
+
+    @$el.on 'keydown', (e)->
+      self.P.display.keyselect e
 
 
   # проверка
