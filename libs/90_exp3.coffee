@@ -12,12 +12,14 @@ $ ->
     key: key
     type: 'street'
     Type: 'city'
+    limit: 10
 
   locationOptions =
     prefix:'locationKL'
     token: token
     key: key
     type: 'city'
+    limit: 10
     onSelect: (obj)->
       # Изменения родительского объекта для автодополнения улиц
       streetOptions.parentId = obj.id

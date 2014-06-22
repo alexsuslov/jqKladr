@@ -10,13 +10,15 @@
       token: token,
       key: key,
       type: 'street',
-      Type: 'city'
+      Type: 'city',
+      limit: 10
     };
     locationOptions = {
       prefix: 'locationKL',
       token: token,
       key: key,
       type: 'city',
+      limit: 10,
       onSelect: function(obj) {
         return streetOptions.parentId = obj.id;
       }
