@@ -145,6 +145,20 @@ class Display
 
   # события
   events:->
-    # @$list
+    self = @
+    $li = @$list.find('li')
+
+    $li.on 'mouseenter',(e)->
+      self.$list.find('li').removeClass "active"
+      self.activate $(e.target)
+
+    $li.on 'click',(e)->
+      $(e.target).removeClass "active"
+      self.P.input.val $(e.target).data('val')
+      self.close()
+
+    $li.on 'mouseleave',(e)->
+      $(e.target).removeClass "active"
+
 
 

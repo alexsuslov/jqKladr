@@ -265,7 +265,23 @@
       return this.$el.hide();
     };
 
-    Display.prototype.events = function() {};
+    Display.prototype.events = function() {
+      var $li, self;
+      self = this;
+      $li = this.$list.find('li');
+      $li.on('mouseenter', function(e) {
+        self.$list.find('li').removeClass("active");
+        return self.activate($(e.target));
+      });
+      $li.on('click', function(e) {
+        $(e.target).removeClass("active");
+        self.P.input.val($(e.target).data('val'));
+        return self.close();
+      });
+      return $li.on('mouseleave', function(e) {
+        return $(e.target).removeClass("active");
+      });
+    };
 
     return Display;
 
