@@ -27,7 +27,8 @@
      */
 
     Kladr.prototype.api = function(query, callback) {
-      var params;
+      var params, self;
+      self = this;
       params = {};
       if (this.opt.token) {
         params.token = this.opt.token;
@@ -49,7 +50,10 @@
         params[this.opt.Type + "Id"] = this.opt.parentId;
       }
       params._ = Math.round(new Date().getTime() / 1000);
-      $.getJSON($.kladr.url + "?callback=?", params, function(data, textStatus) {
+      $.getJSON($.kladr.url + "?callback=?", params, function(data) {
+        if (data) {
+          self.data = data;
+        }
         if (callback) {
           return callback(data.result);
         }
@@ -97,6 +101,7 @@
       if (typeof value === 'undefined') {
         return this.$el.val();
       } else {
+        this.P.select(value);
         return this.$el.val(value);
       }
     };
@@ -178,7 +183,7 @@
           return "<strong>" + highlight + "</strong>";
         });
       }
-      return "<li data-val=\"" + item.name + "\" > " + name + " </li>";
+      return "<li data-val=\"" + item.name + "\" > " + item.typeShort + ". " + name + " </li>";
     };
 
     Display.prototype.style = function() {
@@ -327,6 +332,23 @@
     };
 
     Plugin.prototype.close = function() {};
+
+    Plugin.prototype.select = function(name) {
+      var item, _i, _len, _ref, _ref1, _ref2;
+      if ((_ref = this.kladr.data) != null ? (_ref1 = _ref.result) != null ? _ref1.length : void 0 : void 0) {
+        _ref2 = this.kladr.data.result;
+        for (_i = 0, _len = _ref2.length; _i < _len; _i++) {
+          item = _ref2[_i];
+          if (item.name === name) {
+            this.selected = item;
+          }
+          break;
+        }
+      }
+      if (this.selected && this.opt.onSelect) {
+        return this.opt.onSelect(this.selected);
+      }
+    };
 
     return Plugin;
 

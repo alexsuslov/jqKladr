@@ -19,6 +19,7 @@ class Kladr
   @param callback[function] (result)
   ###
   api: (query, callback) ->
+    self = @
     params = {}
     params.token = @opt.token  if @opt.token
     params.key = @opt.key  if @opt.key
@@ -29,7 +30,8 @@ class Kladr
     params[@opt.Type + "Id"] = @opt.parentId  if @opt.Type and @opt.parentId
     params._ = Math.round new Date().getTime() / 1000
 
-    $.getJSON $.kladr.url + "?callback=?", params, (data, textStatus)->
+    $.getJSON $.kladr.url + "?callback=?", params, (data)->
+      self.data = data if data
       callback(data.result) if callback
 
     @
@@ -63,6 +65,7 @@ class Input
     if typeof(value) is 'undefined'
       return @$el.val()
     else
+      @P.select value
       @$el.val value
 
   # События ввода
@@ -161,7 +164,7 @@ class Display
     if @highlight
       name = name.replace new RegExp( '(' + @highlight + ')', 'gi') , (highlight)->
         "<strong>#{highlight}</strong>"
-    "<li data-val=\"#{item.name}\" > #{name} </li>"
+    "<li data-val=\"#{item.name}\" > #{item.typeShort}. #{name} </li>"
 
   # шаблон стилей
   # @todo поменять background-image на встроенный
@@ -355,6 +358,16 @@ class Plugin
   # Закрыть список
   # @todo
   close:()->
+
+  # выбор объекта
+  select:(name)->
+    # нахожу выбранный объект
+    if @kladr.data?.result?.length
+      for item in @kladr.data.result
+        @selected = item if item.name is name
+        break
+    @opt.onSelect @selected if @selected and @opt.onSelect
+
 
 $ ->
   # создаю плагин

@@ -19,6 +19,7 @@ class Kladr
   @param callback[function] (result)
   ###
   api: (query, callback) ->
+    self = @
     params = {}
     params.token = @opt.token  if @opt.token
     params.key = @opt.key  if @opt.key
@@ -29,7 +30,8 @@ class Kladr
     params[@opt.Type + "Id"] = @opt.parentId  if @opt.Type and @opt.parentId
     params._ = Math.round new Date().getTime() / 1000
 
-    $.getJSON $.kladr.url + "?callback=?", params, (data, textStatus)->
+    $.getJSON $.kladr.url + "?callback=?", params, (data)->
+      self.data = data if data
       callback(data.result) if callback
 
     @

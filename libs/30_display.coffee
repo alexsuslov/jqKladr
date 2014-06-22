@@ -19,7 +19,7 @@ class Display
     if @highlight
       name = name.replace new RegExp( '(' + @highlight + ')', 'gi') , (highlight)->
         "<strong>#{highlight}</strong>"
-    "<li data-val=\"#{item.name}\" > #{name} </li>"
+    "<li data-val=\"#{item.name}\" > #{item.typeShort}. #{name} </li>"
 
   # шаблон стилей
   # @todo поменять background-image на встроенный

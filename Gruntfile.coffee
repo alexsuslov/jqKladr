@@ -41,6 +41,14 @@ module.exports = (grunt)->
           'examples/js/exp2.js':[
             'libs/90_exp2.coffee'
           ]
+      exp3:
+        options:
+          # bare: true
+          sourceMap: true
+        files:
+          'examples/js/exp3.js':[
+            'libs/90_exp3.coffee'
+          ]
     codo: options:
       # undocumented: true
       title: "Kladr"

@@ -41,6 +41,16 @@ class Plugin
   # @todo
   close:()->
 
+  # выбор объекта
+  select:(name)->
+    # нахожу выбранный объект
+    if @kladr.data?.result?.length
+      for item in @kladr.data.result
+        @selected = item if item.name is name
+        break
+    @opt.onSelect @selected if @selected and @opt.onSelect
+
+
 $ ->
   # создаю плагин
   $.fn.jqKladr = (options)->

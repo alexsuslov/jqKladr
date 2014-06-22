@@ -16,6 +16,7 @@ class Input
     if typeof(value) is 'undefined'
       return @$el.val()
     else
+      @P.select value
       @$el.val value
 
   # События ввода
