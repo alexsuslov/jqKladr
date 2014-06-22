@@ -43,3 +43,4 @@ class Kladr
         callback and callback(objs[0])
       else
         callback and callback(false)
+

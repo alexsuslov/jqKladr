@@ -1,4 +1,4 @@
-# Ввод запроса
+# Класс обработки input
 class Input
   ###
   Конструктор
@@ -10,11 +10,14 @@ class Input
     @opt = @P.opt if @P?.opt
     @kladr = @P.kladr
     @events()
+
+  # установщик значение
   val:(value)->
     if typeof(value) is 'undefined'
       return @$el.val()
     else
       @$el.val value
+
   # События ввода
   events:->
     self = @
@@ -71,7 +74,7 @@ class Input
     true
 
   ###
-  Обработка данных
+  Обработка ввода текста
   ###
   key:(val)->
     key =
@@ -88,8 +91,4 @@ class Input
     for char in str
       newStr += key.enRU char
     newStr
-
-
-
-
 

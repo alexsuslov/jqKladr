@@ -22,17 +22,25 @@ module.exports = (grunt)->
           'dist/kladr.js':[
             'kladr.coffee'
             'libs/**/*.coffee'
-            '!libs/test*.coffee'
+            '!libs/90*.coffee'
           ]
       # тесты для браузера
-      # test:
-      #   options:
-      #     bare: true
-      #     sourceMap: true
-      #   files:
-      #     'js/kladr.test.js':[
-      #       'libs/test*.coffee'
-      #     ]
+      exp1:
+        options:
+          bare: true
+          sourceMap: true
+        files:
+          'examples/js/exp1.js':[
+            'libs/90_exp1.coffee'
+          ]
+      exp2:
+        options:
+          # bare: true
+          sourceMap: true
+        files:
+          'examples/js/exp2.js':[
+            'libs/90_exp2.coffee'
+          ]
     codo: options:
       # undocumented: true
       title: "Kladr"

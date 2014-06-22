@@ -1,17 +1,19 @@
+# Класс для показа списка
 class Display
+  #кнопки
   keys:
     up: 38
     down: 40
     esc: 27
     enter: 13
 
-  # объект
+  # шаблон основного объекта
   template:->
     """
 <div id="#{@P.opt.prefix}_autocomplete"><ul></ul></div>
 
     """
-  # строка
+  # шаблон строки
   row:(item)->
     name = item.name
     if @highlight
@@ -19,7 +21,8 @@ class Display
         "<strong>#{highlight}</strong>"
     "<li data-val=\"#{item.name}\" > #{name} </li>"
 
-  # стили
+  # шаблон стилей
+  # @todo поменять background-image на встроенный
   style:->
     """
 <style>
@@ -82,6 +85,7 @@ class Display
     @$list = $("##{@P.opt.prefix}_autocomplete ul")
     @position()
 
+  # позиция списка
   position: ->
     input = @P.input.$el
     inputOffset = input.offset()
@@ -94,12 +98,6 @@ class Display
     differ = @$list.outerWidth() - @$list.width()
     @$list.width inputWidth - differ
 
-    # spinnerWidth = spinner.width()
-    # spinnerHeight = spinner.height()
-    # spinner.css
-    #   top: inputOffset.top + (inputHeight - spinnerHeight) / 2 - 1
-    #   left: inputOffset.left + inputWidth - spinnerWidth - 2
-
   # собрать список
   render:->
     self = @
@@ -109,6 +107,7 @@ class Display
     @events()
     @$el.show()
 
+  # активировать строку в списке
   activate:(active)->
     active.addClass "active"
 
@@ -117,21 +116,26 @@ class Display
     active = @$list.find("li.active")
 
     switch e.which
+      # нажата кнопка вверх
       when @keys.up
         if active.length
           active.removeClass "active"
           @activate active.prev()
         else
           @activate @$list.find("li").last()
+      # нажата кнопка вниз
       when @keys.down
         if active.length
           active.removeClass "active"
           @activate active.next()
         else
           @activate @$list.find("li").first()
+      # нажата кнопка esc
       when @keys.esc
         active.removeClass "active"
         @close()
+
+      # нажата кнопка enter
       when @keys.enter
         # вставляю выбранное значение в input
         unless @opt.arrowSelect
@@ -148,15 +152,19 @@ class Display
     self = @
     $li = @$list.find('li')
 
+    # мышь на списке
     $li.on 'mouseenter',(e)->
       self.$list.find('li').removeClass "active"
       self.activate $(e.target)
 
+    # клик мыши на списке
     $li.on 'click',(e)->
       $(e.target).removeClass "active"
+      # вставляю выбранное значение в input
       self.P.input.val $(e.target).data('val')
       self.close()
 
+    # мышь покинула список
     $li.on 'mouseleave',(e)->
       $(e.target).removeClass "active"
 

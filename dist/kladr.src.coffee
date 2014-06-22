@@ -44,7 +44,8 @@ class Kladr
       else
         callback and callback(false)
 
-# Ввод запроса
+
+# Класс обработки input
 class Input
   ###
   Конструктор
@@ -56,11 +57,14 @@ class Input
     @opt = @P.opt if @P?.opt
     @kladr = @P.kladr
     @events()
+
+  # установщик значение
   val:(value)->
     if typeof(value) is 'undefined'
       return @$el.val()
     else
       @$el.val value
+
   # События ввода
   events:->
     self = @
@@ -117,7 +121,7 @@ class Input
     true
 
   ###
-  Обработка данных
+  Обработка ввода текста
   ###
   key:(val)->
     key =
@@ -136,24 +140,22 @@ class Input
     newStr
 
 
-
-
-
-
+# Класс для показа списка
 class Display
+  #кнопки
   keys:
     up: 38
     down: 40
     esc: 27
     enter: 13
 
-  # объект
+  # шаблон основного объекта
   template:->
     """
 <div id="#{@P.opt.prefix}_autocomplete"><ul></ul></div>
 
     """
-  # строка
+  # шаблон строки
   row:(item)->
     name = item.name
     if @highlight
@@ -161,7 +163,8 @@ class Display
         "<strong>#{highlight}</strong>"
     "<li data-val=\"#{item.name}\" > #{name} </li>"
 
-  # стили
+  # шаблон стилей
+  # @todo поменять background-image на встроенный
   style:->
     """
 <style>
@@ -224,6 +227,7 @@ class Display
     @$list = $("##{@P.opt.prefix}_autocomplete ul")
     @position()
 
+  # позиция списка
   position: ->
     input = @P.input.$el
     inputOffset = input.offset()
@@ -236,12 +240,6 @@ class Display
     differ = @$list.outerWidth() - @$list.width()
     @$list.width inputWidth - differ
 
-    # spinnerWidth = spinner.width()
-    # spinnerHeight = spinner.height()
-    # spinner.css
-    #   top: inputOffset.top + (inputHeight - spinnerHeight) / 2 - 1
-    #   left: inputOffset.left + inputWidth - spinnerWidth - 2
-
   # собрать список
   render:->
     self = @
@@ -251,6 +249,7 @@ class Display
     @events()
     @$el.show()
 
+  # активировать строку в списке
   activate:(active)->
     active.addClass "active"
 
@@ -259,21 +258,26 @@ class Display
     active = @$list.find("li.active")
 
     switch e.which
+      # нажата кнопка вверх
       when @keys.up
         if active.length
           active.removeClass "active"
           @activate active.prev()
         else
           @activate @$list.find("li").last()
+      # нажата кнопка вниз
       when @keys.down
         if active.length
           active.removeClass "active"
           @activate active.next()
         else
           @activate @$list.find("li").first()
+      # нажата кнопка esc
       when @keys.esc
         active.removeClass "active"
         @close()
+
+      # нажата кнопка enter
       when @keys.enter
         # вставляю выбранное значение в input
         unless @opt.arrowSelect
@@ -290,15 +294,19 @@ class Display
     self = @
     $li = @$list.find('li')
 
+    # мышь на списке
     $li.on 'mouseenter',(e)->
       self.$list.find('li').removeClass "active"
       self.activate $(e.target)
 
+    # клик мыши на списке
     $li.on 'click',(e)->
       $(e.target).removeClass "active"
+      # вставляю выбранное значение в input
       self.P.input.val $(e.target).data('val')
       self.close()
 
+    # мышь покинула список
     $li.on 'mouseleave',(e)->
       $(e.target).removeClass "active"
 
@@ -353,16 +361,4 @@ $ ->
   $.fn.jqKladr = (options)->
     new Plugin options, @
 
-# Кодинг Тест
-$ ->
-  # Подключение автодополнения улиц
-  $('[name="mskstreet"]').jqKladr
-    prefix:'jqKladr'
-    token: '51dfe5d42fb2b43e3300006e'
-    key: '86a2c2a06f1b2451a87d05512cc2c3edfdf41969'
-    # type: $.kladr.type.street
-    type: 'street'
-    # parentType: $.kladr.type.city
-    Type:'city'
-    parentId: '7700000000000'
-    limit: 10
+
