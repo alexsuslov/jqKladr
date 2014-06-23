@@ -5,7 +5,7 @@ class Input
   @param P[Object] parrent object
   ###
   constructor:(@P)->
-    console.log 'load input'
+    console.log 'load input' if @debug
     @$el = $ @P.el if @P.el
     @opt = @P.opt if @P?.opt
     @kladr = @P.kladr

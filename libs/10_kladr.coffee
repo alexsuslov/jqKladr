@@ -29,7 +29,9 @@ class Kladr
     params.cityId = @opt.cityId  if @opt.cityId
     params.limit = (if @opt.limit then @opt.limit else 2000)
     params[@opt.Type + "Id"] = @opt.parentId  if @opt.Type and @opt.parentId
+    params.withParent = 1 if @opt.withParents
     params._ = Math.round new Date().getTime() / 1000
+    console.log params
 
     $.getJSON @url + "?callback=?", params, (data)->
       self.data = data if data

@@ -29,7 +29,9 @@ class Kladr
     params.cityId = @opt.cityId  if @opt.cityId
     params.limit = (if @opt.limit then @opt.limit else 2000)
     params[@opt.Type + "Id"] = @opt.parentId  if @opt.Type and @opt.parentId
+    params.withParent = 1 if @opt.withParents
     params._ = Math.round new Date().getTime() / 1000
+    console.log params
 
     $.getJSON @url + "?callback=?", params, (data)->
       self.data = data if data
@@ -56,7 +58,7 @@ class Input
   @param P[Object] parrent object
   ###
   constructor:(@P)->
-    console.log 'load input'
+    console.log 'load input' if @debug
     @$el = $ @P.el if @P.el
     @opt = @P.opt if @P?.opt
     @kladr = @P.kladr
@@ -171,6 +173,7 @@ class Display
     """
   # шаблон строки
   row:(item)->
+    console.log item if @debug
     name = item.name
     if @highlight
       name = name.replace new RegExp( '(' + @highlight + ')', 'gi') , (highlight)->
@@ -331,14 +334,14 @@ class Display
 class Plugin
   # Конструктор
   constructor: (@opt, @el)->
-    console.log 'plugin load'
+    console.log 'plugin load' if @debug
     @$el = $ @el
     @$el.attr 'autocomplete', "off"
     # kladr
     @kladr = new Kladr @
     # create input
     if @$el
-      console.log 'create input'
+      console.log 'create input' if @debug
       @input =  new Input @
 
     #display

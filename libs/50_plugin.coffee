@@ -2,14 +2,14 @@
 class Plugin
   # Конструктор
   constructor: (@opt, @el)->
-    console.log 'plugin load'
+    console.log 'plugin load' if @debug
     @$el = $ @el
     @$el.attr 'autocomplete', "off"
     # kladr
     @kladr = new Kladr @
     # create input
     if @$el
-      console.log 'create input'
+      console.log 'create input' if @debug
       @input =  new Input @
 
     #display

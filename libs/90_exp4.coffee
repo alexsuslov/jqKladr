@@ -48,29 +48,29 @@ $ ->
 
 
   # Формирует подписи в autocomplete
-  # LabelFormat = (obj, query) ->
-  #   label = ""
-  #   name = obj.name.toLowerCase()
-  #   query = query.toLowerCase()
-  #   start = name.indexOf(query)
-  #   start = (if start > 0 then start else 0)
-  #   label += "<span class=\"ac-s2\">" + obj.typeShort + ". " + "</span>"  if obj.typeShort
-  #   if query.length < obj.name.length
-  #     label += "<span class=\"ac-s2\">" + obj.name.substr(0, start) + "</span>"
-  #     label += "<span class=\"ac-s\">" + obj.name.substr(start, query.length) + "</span>"
-  #     label += "<span class=\"ac-s2\">" + obj.name.substr(start + query.length, obj.name.length - query.length - start) + "</span>"
-  #   else
-  #     label += "<span class=\"ac-s\">" + obj.name + "</span>"
-  #   if obj.parents
-  #     k = obj.parents.length - 1
+  LabelFormat = (obj, query) ->
+    label = ""
+    name = obj.name.toLowerCase()
+    query = query.toLowerCase()
+    start = name.indexOf(query)
+    start = (if start > 0 then start else 0)
+    label += "<span class=\"ac-s2\">" + obj.typeShort + ". " + "</span>"  if obj.typeShort
+    if query.length < obj.name.length
+      label += "<span class=\"ac-s2\">" + obj.name.substr(0, start) + "</span>"
+      label += "<span class=\"ac-s\">" + obj.name.substr(start, query.length) + "</span>"
+      label += "<span class=\"ac-s2\">" + obj.name.substr(start + query.length, obj.name.length - query.length - start) + "</span>"
+    else
+      label += "<span class=\"ac-s\">" + obj.name + "</span>"
+    if obj.parents
+      k = obj.parents.length - 1
 
-  #     while k > -1
-  #       parent = obj.parents[k]
-  #       if parent.name
-  #         label += "<span class=\"ac-st\">, </span>"  if label
-  #         label += "<span class=\"ac-st\">" + parent.name + " " + parent.typeShort + ".</span>"
-  #       k--
-  #   label
+      while k > -1
+        parent = obj.parents[k]
+        if parent.name
+          label += "<span class=\"ac-st\">, </span>"  if label
+          label += "<span class=\"ac-st\">" + parent.name + " " + parent.typeShort + ".</span>"
+        k--
+    label
 
   # Options
   # building
@@ -82,6 +82,7 @@ $ ->
     # Type: 'street'
     # labelFormat: LabelFormat
     verify: true
+    limit: 10
     onSelect:(obj) ->
       Log obj
       Address.set 'building', obj
@@ -115,6 +116,7 @@ $ ->
     verify: true
     limit: 10
     onSelect: (obj) ->
+      # console.log obj
       Log obj
       Address.set 'city', obj
       $("#address").text Address.addressText()

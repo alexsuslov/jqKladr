@@ -50,7 +50,11 @@
       if (this.opt.Type && this.opt.parentId) {
         params[this.opt.Type + "Id"] = this.opt.parentId;
       }
+      if (this.opt.withParents) {
+        params.withParent = 1;
+      }
       params._ = Math.round(new Date().getTime() / 1000);
+      console.log(params);
       $.getJSON(this.url + "?callback=?", params, function(data) {
         if (data) {
           self.data = data;
@@ -88,7 +92,9 @@
     function Input(P) {
       var _ref;
       this.P = P;
-      console.log('load input');
+      if (this.debug) {
+        console.log('load input');
+      }
       if (this.P.el) {
         this.$el = $(this.P.el);
       }
@@ -188,6 +194,9 @@
 
     Display.prototype.row = function(item) {
       var name;
+      if (this.debug) {
+        console.log(item);
+      }
       name = item.name;
       if (this.highlight) {
         name = name.replace(new RegExp('(' + this.highlight + ')', 'gi'), function(highlight) {
@@ -307,12 +316,16 @@
     function Plugin(opt, el) {
       this.opt = opt;
       this.el = el;
-      console.log('plugin load');
+      if (this.debug) {
+        console.log('plugin load');
+      }
       this.$el = $(this.el);
       this.$el.attr('autocomplete', "off");
       this.kladr = new Kladr(this);
       if (this.$el) {
-        console.log('create input');
+        if (this.debug) {
+          console.log('create input');
+        }
         this.input = new Input(this);
       }
       this.display = new Display(this);

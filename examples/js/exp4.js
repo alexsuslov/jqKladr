@@ -1,6 +1,6 @@
 (function() {
   $(function() {
-    var Address, Log, MapUpdate, building, buildingAdd, city, key, map, map_created, optionsBuilding, optionsCity, optionsStreet, placemark, street, token;
+    var Address, LabelFormat, Log, MapUpdate, building, buildingAdd, city, key, map, map_created, optionsBuilding, optionsCity, optionsStreet, placemark, street, token;
     token = "51dfe5d42fb2b43e3300006e";
     key = "86a2c2a06f1b2451a87d05512cc2c3edfdf41969";
     city = $("[name=\"city\"]");
@@ -63,12 +63,45 @@
         return "" + obj.zip + ", " + obj.address;
       }
     };
+    LabelFormat = function(obj, query) {
+      var k, label, name, parent, start;
+      label = "";
+      name = obj.name.toLowerCase();
+      query = query.toLowerCase();
+      start = name.indexOf(query);
+      start = (start > 0 ? start : 0);
+      if (obj.typeShort) {
+        label += "<span class=\"ac-s2\">" + obj.typeShort + ". " + "</span>";
+      }
+      if (query.length < obj.name.length) {
+        label += "<span class=\"ac-s2\">" + obj.name.substr(0, start) + "</span>";
+        label += "<span class=\"ac-s\">" + obj.name.substr(start, query.length) + "</span>";
+        label += "<span class=\"ac-s2\">" + obj.name.substr(start + query.length, obj.name.length - query.length - start) + "</span>";
+      } else {
+        label += "<span class=\"ac-s\">" + obj.name + "</span>";
+      }
+      if (obj.parents) {
+        k = obj.parents.length - 1;
+        while (k > -1) {
+          parent = obj.parents[k];
+          if (parent.name) {
+            if (label) {
+              label += "<span class=\"ac-st\">, </span>";
+            }
+            label += "<span class=\"ac-st\">" + parent.name + " " + parent.typeShort + ".</span>";
+          }
+          k--;
+        }
+      }
+      return label;
+    };
     optionsBuilding = {
       prefix: 'BuildingKl',
       token: token,
       key: key,
       type: 'building',
       verify: true,
+      limit: 10,
       onSelect: function(obj) {
         Log(obj);
         Address.set('building', obj);

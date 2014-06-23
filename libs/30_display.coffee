@@ -15,6 +15,7 @@ class Display
     """
   # шаблон строки
   row:(item)->
+    console.log item if @debug
     name = item.name
     if @highlight
       name = name.replace new RegExp( '(' + @highlight + ')', 'gi') , (highlight)->
