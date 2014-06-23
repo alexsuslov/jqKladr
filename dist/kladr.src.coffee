@@ -1,10 +1,6 @@
 # Класс работы с API
 class Kladr
-  constructor: (@P)->
-    @opt = @P.opt if @P.opt
-
   url: "http://kladr-api.ru/api.php"
-
   type:
     region: "region"
     district: "district"
@@ -12,6 +8,11 @@ class Kladr
     street: "street"
     building: "building"
 
+  # конструктор
+  # @param P[object] parrent
+  constructor: (@P)->
+    @opt = @P.opt if @P.opt
+    @
 
   ###
   Api
@@ -30,7 +31,7 @@ class Kladr
     params[@opt.Type + "Id"] = @opt.parentId  if @opt.Type and @opt.parentId
     params._ = Math.round new Date().getTime() / 1000
 
-    $.getJSON $.kladr.url + "?callback=?", params, (data)->
+    $.getJSON @url + "?callback=?", params, (data)->
       self.data = data if data
       callback(data.result) if callback
 
@@ -45,6 +46,7 @@ class Kladr
         callback and callback(objs[0])
       else
         callback and callback(false)
+    @
 
 
 # Класс обработки input
@@ -59,16 +61,20 @@ class Input
     @opt = @P.opt if @P?.opt
     @kladr = @P.kladr
     @events()
+    @
 
-  # установщик значение
+  # Setter установщик значение
   val:(value)->
     if typeof(value) is 'undefined'
       return @$el.val()
     else
       @P.select value
       @$el.val value
+    @
 
   # События ввода
+  # KEYUP
+  # KEYDOWN
   events:->
     self = @
     @$el.on 'keyup',(e)->
@@ -89,6 +95,8 @@ class Input
 
     @$el.on 'keydown', (e)->
       self.P.display.keyselect e
+
+    @
 
 
   # проверка
@@ -125,8 +133,11 @@ class Input
 
   ###
   Обработка ввода текста
+  @param val[string] строка набранная латиницей или кирилицей
+  @return [string] строка в кирилице
   ###
   key:(val)->
+    # объект преобразования
     key =
       en: "1234567890qazwsxedcrfvtgbyhnujmik,ol.p;[']- " + "QAZWSXEDCRFVTGBYHNUJMIK<OL>P:{\"} "
       ru: "1234567890йфяцычувскамепинртгоьшлбщдюзжхэъ- " + "ЙФЯЦЫЧУВСКАМЕПИНРТГОЬШЛБЩДЮЗЖХЭЪ "
@@ -145,13 +156,16 @@ class Input
 
 # Класс для показа списка
 class Display
+  # убирает лишние символы
+  mini:(str)->
+    str.replace(/\r|\n|\t/g,' ').replace(/\s+/g,' ')
   #кнопки
   keys:
     up: 38, down: 40, esc: 27, enter: 13
 
   # шаблон основного объекта
   template:->
-    """
+    @mini  """
 <div id="#{@P.opt.prefix}_autocomplete"><ul></ul></div>
 
     """
@@ -161,12 +175,12 @@ class Display
     if @highlight
       name = name.replace new RegExp( '(' + @highlight + ')', 'gi') , (highlight)->
         "<strong>#{highlight}</strong>"
-    "<li data-val=\"#{item.name}\" > #{item.typeShort}. #{name} </li>"
+    @mini "<li data-val=\"#{item.name}\" > #{item.typeShort}. #{name} </li>"
 
   # шаблон стилей
   # @todo поменять background-image на встроенный
   style:->
-    """
+    @mini """
 <style>
 ##{@P.opt.prefix}_autocomplete ul{
     position: absolute;
@@ -319,6 +333,7 @@ class Plugin
   constructor: (@opt, @el)->
     console.log 'plugin load'
     @$el = $ @el
+    @$el.attr 'autocomplete', "off"
     # kladr
     @kladr = new Kladr @
     # create input
@@ -361,8 +376,9 @@ class Plugin
     # нахожу выбранный объект
     if @kladr.data?.result?.length
       for item in @kladr.data.result
-        @selected = item if item.name is name
-        break
+        if item.name is name
+          @selected = item
+          break
     @opt.onSelect @selected if @selected and @opt.onSelect
 
 

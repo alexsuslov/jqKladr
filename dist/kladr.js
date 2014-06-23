@@ -2,13 +2,6 @@
   var Display, Input, Kladr, Plugin;
 
   Kladr = (function() {
-    function Kladr(P) {
-      this.P = P;
-      if (this.P.opt) {
-        this.opt = this.P.opt;
-      }
-    }
-
     Kladr.prototype.url = "http://kladr-api.ru/api.php";
 
     Kladr.prototype.type = {
@@ -18,6 +11,14 @@
       street: "street",
       building: "building"
     };
+
+    function Kladr(P) {
+      this.P = P;
+      if (this.P.opt) {
+        this.opt = this.P.opt;
+      }
+      this;
+    }
 
 
     /*
@@ -50,7 +51,7 @@
         params[this.opt.Type + "Id"] = this.opt.parentId;
       }
       params._ = Math.round(new Date().getTime() / 1000);
-      $.getJSON($.kladr.url + "?callback=?", params, function(data) {
+      $.getJSON(this.url + "?callback=?", params, function(data) {
         if (data) {
           self.data = data;
         }
@@ -64,13 +65,14 @@
     Kladr.prototype.check = function(query, callback) {
       query.withParents = false;
       query.limit = 1;
-      return this.api(query, function(objs) {
+      this.api(query, function(objs) {
         if (objs && objs.length) {
           return callback && callback(objs[0]);
         } else {
           return callback && callback(false);
         }
       });
+      return this;
     };
 
     return Kladr;
@@ -95,6 +97,7 @@
       }
       this.kladr = this.P.kladr;
       this.events();
+      this;
     }
 
     Input.prototype.val = function(value) {
@@ -102,8 +105,9 @@
         return this.$el.val();
       } else {
         this.P.select(value);
-        return this.$el.val(value);
+        this.$el.val(value);
       }
+      return this;
     };
 
     Input.prototype.events = function() {
@@ -122,9 +126,10 @@
         }
         return self.P.query(query);
       });
-      return this.$el.on('keydown', function(e) {
+      this.$el.on('keydown', function(e) {
         return self.P.display.keyselect(e);
       });
+      return this;
     };
 
     Input.prototype.validate = function() {
@@ -134,6 +139,8 @@
 
     /*
     Обработка ввода текста
+    @param val[string] строка набранная латиницей или кирилицей
+    @return [string] строка в кирилице
      */
 
     Input.prototype.key = function(val) {
@@ -164,6 +171,10 @@
   })();
 
   Display = (function() {
+    Display.prototype.mini = function(str) {
+      return str.replace(/\r|\n|\t/g, ' ').replace(/\s+/g, ' ');
+    };
+
     Display.prototype.keys = {
       up: 38,
       down: 40,
@@ -172,7 +183,7 @@
     };
 
     Display.prototype.template = function() {
-      return "<div id=\"" + this.P.opt.prefix + "_autocomplete\"><ul></ul></div>\n";
+      return this.mini("<div id=\"" + this.P.opt.prefix + "_autocomplete\"><ul></ul></div>\n");
     };
 
     Display.prototype.row = function(item) {
@@ -183,11 +194,11 @@
           return "<strong>" + highlight + "</strong>";
         });
       }
-      return "<li data-val=\"" + item.name + "\" > " + item.typeShort + ". " + name + " </li>";
+      return this.mini("<li data-val=\"" + item.name + "\" > " + item.typeShort + ". " + name + " </li>");
     };
 
     Display.prototype.style = function() {
-      return "<style>\n#" + this.P.opt.prefix + "_autocomplete ul{\n    position: absolute;\n    display: block;\n    margin: 0;\n    padding: 0;\n    border: 1px solid rgb(138, 138, 138);\n    border-radius: 3px;\n    background-color: white;\n    z-index: 9999;\n}\n\n#" + this.P.opt.prefix + "_autocomplete li{\n    display: list-item;\n    list-style-type: none;\n    margin: 0;\n    padding: 3px 5px;\n    overflow: hidden;\n    border: 1px solid white;\n    border-bottom: 1px solid rgb(189, 189, 189);\n}\n\n#" + this.P.opt.prefix + "_autocomplete li.active{\n    background-color: rgb(224, 224, 224);\n    border-radius: 3px;\n    border: 1px solid rgb(151, 151, 151);\n}\n\n#" + this.P.opt.prefix + "_autocomplete a{\n    display: block;\n    cursor: default;\n    width: 10000px;\n}\n\n#" + this.P.opt.prefix + "_autocomplete .spinner{\n    position: absolute;\n    display: block;\n    margin: 0;\n    padding: 0;\n    width: 20px;\n    height: 20px;\n    background-color: transparent;\n    background-image: url(\"images/spinner.png\");\n    background-position: center center;\n    background-repeat: no-repeat;\n    z-index: 9999;\n}\n</style>";
+      return this.mini("<style>\n#" + this.P.opt.prefix + "_autocomplete ul{\n    position: absolute;\n    display: block;\n    margin: 0;\n    padding: 0;\n    border: 1px solid rgb(138, 138, 138);\n    border-radius: 3px;\n    background-color: white;\n    z-index: 9999;\n}\n\n#" + this.P.opt.prefix + "_autocomplete li{\n    display: list-item;\n    list-style-type: none;\n    margin: 0;\n    padding: 3px 5px;\n    overflow: hidden;\n    border: 1px solid white;\n    border-bottom: 1px solid rgb(189, 189, 189);\n}\n\n#" + this.P.opt.prefix + "_autocomplete li.active{\n    background-color: rgb(224, 224, 224);\n    border-radius: 3px;\n    border: 1px solid rgb(151, 151, 151);\n}\n\n#" + this.P.opt.prefix + "_autocomplete a{\n    display: block;\n    cursor: default;\n    width: 10000px;\n}\n\n#" + this.P.opt.prefix + "_autocomplete .spinner{\n    position: absolute;\n    display: block;\n    margin: 0;\n    padding: 0;\n    width: 20px;\n    height: 20px;\n    background-color: transparent;\n    background-image: url(\"images/spinner.png\");\n    background-position: center center;\n    background-repeat: no-repeat;\n    z-index: 9999;\n}\n</style>");
     };
 
     function Display(P) {
@@ -298,6 +309,7 @@
       this.el = el;
       console.log('plugin load');
       this.$el = $(this.el);
+      this.$el.attr('autocomplete', "off");
       this.kladr = new Kladr(this);
       if (this.$el) {
         console.log('create input');
@@ -341,8 +353,8 @@
           item = _ref2[_i];
           if (item.name === name) {
             this.selected = item;
+            break;
           }
-          break;
         }
       }
       if (this.selected && this.opt.onSelect) {

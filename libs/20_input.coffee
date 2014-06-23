@@ -10,16 +10,20 @@ class Input
     @opt = @P.opt if @P?.opt
     @kladr = @P.kladr
     @events()
+    @
 
-  # установщик значение
+  # Setter установщик значение
   val:(value)->
     if typeof(value) is 'undefined'
       return @$el.val()
     else
       @P.select value
       @$el.val value
+    @
 
   # События ввода
+  # KEYUP
+  # KEYDOWN
   events:->
     self = @
     @$el.on 'keyup',(e)->
@@ -40,6 +44,8 @@ class Input
 
     @$el.on 'keydown', (e)->
       self.P.display.keyselect e
+
+    @
 
 
   # проверка
@@ -76,8 +82,11 @@ class Input
 
   ###
   Обработка ввода текста
+  @param val[string] строка набранная латиницей или кирилицей
+  @return [string] строка в кирилице
   ###
   key:(val)->
+    # объект преобразования
     key =
       en: "1234567890qazwsxedcrfvtgbyhnujmik,ol.p;[']- " + "QAZWSXEDCRFVTGBYHNUJMIK<OL>P:{\"} "
       ru: "1234567890йфяцычувскамепинртгоьшлбщдюзжхэъ- " + "ЙФЯЦЫЧУВСКАМЕПИНРТГОЬШЛБЩДЮЗЖХЭЪ "

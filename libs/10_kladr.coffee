@@ -1,10 +1,6 @@
 # Класс работы с API
 class Kladr
-  constructor: (@P)->
-    @opt = @P.opt if @P.opt
-
   url: "http://kladr-api.ru/api.php"
-
   type:
     region: "region"
     district: "district"
@@ -12,6 +8,11 @@ class Kladr
     street: "street"
     building: "building"
 
+  # конструктор
+  # @param P[object] parrent
+  constructor: (@P)->
+    @opt = @P.opt if @P.opt
+    @
 
   ###
   Api
@@ -30,7 +31,7 @@ class Kladr
     params[@opt.Type + "Id"] = @opt.parentId  if @opt.Type and @opt.parentId
     params._ = Math.round new Date().getTime() / 1000
 
-    $.getJSON $.kladr.url + "?callback=?", params, (data)->
+    $.getJSON @url + "?callback=?", params, (data)->
       self.data = data if data
       callback(data.result) if callback
 
@@ -45,4 +46,5 @@ class Kladr
         callback and callback(objs[0])
       else
         callback and callback(false)
+    @
 

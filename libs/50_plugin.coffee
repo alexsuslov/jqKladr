@@ -4,6 +4,7 @@ class Plugin
   constructor: (@opt, @el)->
     console.log 'plugin load'
     @$el = $ @el
+    @$el.attr 'autocomplete', "off"
     # kladr
     @kladr = new Kladr @
     # create input
@@ -46,8 +47,9 @@ class Plugin
     # нахожу выбранный объект
     if @kladr.data?.result?.length
       for item in @kladr.data.result
-        @selected = item if item.name is name
-        break
+        if item.name is name
+          @selected = item
+          break
     @opt.onSelect @selected if @selected and @opt.onSelect
 
 

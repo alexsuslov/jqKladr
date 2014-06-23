@@ -1,12 +1,15 @@
 # Класс для показа списка
 class Display
+  # убирает лишние символы
+  mini:(str)->
+    str.replace(/\r|\n|\t/g,' ').replace(/\s+/g,' ')
   #кнопки
   keys:
     up: 38, down: 40, esc: 27, enter: 13
 
   # шаблон основного объекта
   template:->
-    """
+    @mini  """
 <div id="#{@P.opt.prefix}_autocomplete"><ul></ul></div>
 
     """
@@ -16,12 +19,12 @@ class Display
     if @highlight
       name = name.replace new RegExp( '(' + @highlight + ')', 'gi') , (highlight)->
         "<strong>#{highlight}</strong>"
-    "<li data-val=\"#{item.name}\" > #{item.typeShort}. #{name} </li>"
+    @mini "<li data-val=\"#{item.name}\" > #{item.typeShort}. #{name} </li>"
 
   # шаблон стилей
   # @todo поменять background-image на встроенный
   style:->
-    """
+    @mini """
 <style>
 ##{@P.opt.prefix}_autocomplete ul{
     position: absolute;
