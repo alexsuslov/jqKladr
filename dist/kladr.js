@@ -54,7 +54,6 @@
         params.withParent = 1;
       }
       params._ = Math.round(new Date().getTime() / 1000);
-      console.log(params);
       $.getJSON(this.url + "?callback=?", params, function(data) {
         if (data) {
           self.data = data;

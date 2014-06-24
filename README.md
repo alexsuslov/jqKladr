@@ -12,4 +12,9 @@ grunt serve
 ```
 
 ## use
-sorry, not work.
+```
+bower install jqKladr
+```
+
+### Expample 
+examples/exp1.html

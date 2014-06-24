@@ -31,7 +31,7 @@ class Kladr
     params[@opt.Type + "Id"] = @opt.parentId  if @opt.Type and @opt.parentId
     params.withParent = 1 if @opt.withParents
     params._ = Math.round new Date().getTime() / 1000
-    console.log params
+    # console.log params
 
     $.getJSON @url + "?callback=?", params, (data)->
       self.data = data if data
