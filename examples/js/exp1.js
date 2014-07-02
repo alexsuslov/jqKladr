@@ -6,7 +6,7 @@ $(function() {
     type: 'street',
     Type: 'city',
     parentId: '7700000000000',
-    limit: 10
+    limit: 50
   });
 });
 
